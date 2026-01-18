@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Road Path Map", layout="centered")
-st.title("🚌 Kolhapur Bus Stand ➝ 📍 Current Location (Road Route)")
+st.title("🚌 Kolhapur Bus Stand(Parking) ➝ 📍 Current Location (Road Route)")
 
 html_code = """
 <!DOCTYPE html>
