@@ -1,8 +1,8 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Route to Current Location", layout="centered")
-st.title("🚌 Kolhapur Bus Stand ➝ 📍 Current Location")
+st.set_page_config(page_title="Line Path Map", layout="centered")
+st.title("🚌 Kolhapur Bus Stand ➝ 📍 Current Location (Line Path)")
 
 html_code = """
 <!DOCTYPE html>
@@ -13,11 +13,7 @@ html_code = """
 <link rel="stylesheet"
  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<link rel="stylesheet"
- href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
 <style>
 #map { height: 400px; width: 100%; }
@@ -26,11 +22,11 @@ html_code = """
 
 <body>
 
-<p id="status">📡 Fetching current location...</p>
+<p id="status">📡 Getting your location...</p>
 <div id="map"></div>
 
 <script>
-const kolhapurBusStand = [16.704987, 74.243252];
+const busStand = [16.704987, 74.243252];
 
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
@@ -40,25 +36,33 @@ if (navigator.geolocation) {
       const userLon = position.coords.longitude;
 
       document.getElementById("status").innerHTML =
-        `🚌 Start: Kolhapur Bus Stand<br>
-         📍 Destination: Your Location<br>
+        `🚌 Kolhapur Bus Stand<br>
+         📍 Your Location<br>
          Lat: ${userLat}, Lon: ${userLon}`;
 
-      var map = L.map('map').setView(kolhapurBusStand, 13);
+      var map = L.map('map').setView(busStand, 13);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19
       }).addTo(map);
 
-      L.Routing.control({
-        waypoints: [
-          L.latLng(kolhapurBusStand[0], kolhapurBusStand[1]),
-          L.latLng(userLat, userLon)
-        ],
-        routeWhileDragging: false,
-        draggableWaypoints: false,
-        show: true
+      // Markers
+      L.marker(busStand).addTo(map).bindPopup("🚌 Kolhapur Bus Stand");
+      L.marker([userLat, userLon]).addTo(map).bindPopup("📍 You");
+
+      // Line Path
+      var path = [
+        busStand,
+        [userLat, userLon]
+      ];
+
+      L.polyline(path, {
+        color: 'blue',
+        weight: 4,
+        dashArray: '6, 6'
       }).addTo(map);
+
+      map.fitBounds(path);
     },
     function(error) {
       document.getElementById("status").innerHTML =
