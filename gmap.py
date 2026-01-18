@@ -1,55 +1,64 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Mobile Location Map", layout="centered")
-
-st.title("📍 Current Mobile Location with Map")
+st.set_page_config(page_title="Route to Current Location", layout="centered")
+st.title("🚌 Kolhapur Bus Stand ➝ 📍 Current Location")
 
 html_code = """
 <!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
+
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
 <style>
-#map {
-  height: 300px;
-  width: 100%;
-}
+#map { height: 400px; width: 100%; }
 </style>
 </head>
 
 <body>
 
-<p id="status">📡 Fetching location...</p>
+<p id="status">📡 Fetching current location...</p>
 <div id="map"></div>
 
 <script>
+const kolhapurBusStand = [16.704987, 74.243252];
+
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
     function(position) {
 
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
-      const acc = position.coords.accuracy;
+      const userLat = position.coords.latitude;
+      const userLon = position.coords.longitude;
 
       document.getElementById("status").innerHTML =
-        `Latitude: ${lat}<br>Longitude: ${lon}<br>Accuracy: ${acc} meters`;
+        `🚌 Start: Kolhapur Bus Stand<br>
+         📍 Destination: Your Location<br>
+         Lat: ${userLat}, Lon: ${userLon}`;
 
-      var map = L.map('map').setView([lat, lon], 16);
+      var map = L.map('map').setView(kolhapurBusStand, 13);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19
       }).addTo(map);
 
-      L.marker([lat, lon]).addTo(map)
-        .bindPopup("📍 You are here")
-        .openPopup();
+      L.Routing.control({
+        waypoints: [
+          L.latLng(kolhapurBusStand[0], kolhapurBusStand[1]),
+          L.latLng(userLat, userLon)
+        ],
+        routeWhileDragging: false,
+        draggableWaypoints: false,
+        show: true
+      }).addTo(map);
     },
     function(error) {
       document.getElementById("status").innerHTML =
@@ -66,4 +75,4 @@ if (navigator.geolocation) {
 </html>
 """
 
-components.html(html_code, height=420)
+components.html(html_code, height=460)
