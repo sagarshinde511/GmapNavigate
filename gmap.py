@@ -1,8 +1,8 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Line Path Map", layout="centered")
-st.title("🚌 Kolhapur Bus Stand ➝ 📍 Current Location (Line Path)")
+st.set_page_config(page_title="Road Path Map", layout="centered")
+st.title("🚌 Kolhapur Bus Stand ➝ 📍 Current Location (Road Route)")
 
 html_code = """
 <!DOCTYPE html>
@@ -13,16 +13,20 @@ html_code = """
 <link rel="stylesheet"
  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
 <style>
-#map { height: 400px; width: 100%; }
+#map { height: 420px; width: 100%; }
 </style>
 </head>
 
 <body>
 
-<p id="status">📡 Getting your location...</p>
+<p id="status">📡 Getting your current location...</p>
 <div id="map"></div>
 
 <script>
@@ -36,9 +40,8 @@ if (navigator.geolocation) {
       const userLon = position.coords.longitude;
 
       document.getElementById("status").innerHTML =
-        `🚌 Kolhapur Bus Stand<br>
-         📍 Your Location<br>
-         Lat: ${userLat}, Lon: ${userLon}`;
+        `🚌 Start: Kolhapur Bus Stand<br>
+         📍 Destination: Your Location`;
 
       var map = L.map('map').setView(busStand, 13);
 
@@ -46,23 +49,19 @@ if (navigator.geolocation) {
         maxZoom: 19
       }).addTo(map);
 
-      // Markers
-      L.marker(busStand).addTo(map).bindPopup("🚌 Kolhapur Bus Stand");
-      L.marker([userLat, userLon]).addTo(map).bindPopup("📍 You");
-
-      // Line Path
-      var path = [
-        busStand,
-        [userLat, userLon]
-      ];
-
-      L.polyline(path, {
-        color: 'blue',
-        weight: 4,
-        dashArray: '6, 6'
+      L.Routing.control({
+        waypoints: [
+          L.latLng(busStand[0], busStand[1]),
+          L.latLng(userLat, userLon)
+        ],
+        routeWhileDragging: false,
+        draggableWaypoints: false,
+        addWaypoints: false,
+        show: false,
+        lineOptions: {
+          styles: [{color: 'blue', weight: 5}]
+        }
       }).addTo(map);
-
-      map.fitBounds(path);
     },
     function(error) {
       document.getElementById("status").innerHTML =
@@ -79,4 +78,4 @@ if (navigator.geolocation) {
 </html>
 """
 
-components.html(html_code, height=460)
+components.html(html_code, height=480)
